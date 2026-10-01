@@ -17,6 +17,11 @@ Sistem ini telah diuji dan berjalan secara penuh di infrastruktur server mandiri
 - **Otomasi Deploy:** Script Bash (`autodeploy.sh`) + Git Pull + Cron Job Backup
 - **Pemicu (Trigger):** GitHub Webhooks (Event `push` ke branch `main`)
 
+> 📚 **DOKUMEN & PANDUAN PENTING MAHASISWA:**
+> * 🐘 [**Panduan Upload & Deploy Framework (Laravel, React, Node.js, PHP)**](TUTORIAL_UPLOAD_FRAMEWORK.md) — *Cara aman upload proyek framework tanpa vendor & node_modules*
+> * 📄 [**Contoh Laporan Praktikum Sesuai Standar RPS (Nilai A+)**](CONTOH_LAPORAN.md) — *Template dan data pengujian latensi commit-to-deploy*
+> * ⚡ [**Tab GitHub Actions**](https://github.com/NourAnisa/autodeploy-sti5134/actions) — *Pantau proses build & deploy otomatis*
+
 ---
 
 ## 🗺️ Gambaran Sistem & Arsitektur CI/CD
@@ -224,6 +229,22 @@ Bagi mahasiswa yang ditugaskan melakukan kontribusi ke server pusat kelas:
 2. Saat Dosen melakukan merge PR ke branch `main`, GitHub secara otomatis memicu Webhook ke `http://103.180.124.142:8080`.
 3. Server VPS kelas akan mengeksekusi `git pull` secara instan dalam waktu kurang dari 5 detik.
 4. Perubahan seluruh mahasiswa langsung tampil di server kelas.
+
+---
+
+## 🐘 BAGIAN 2.5: Panduan Mahasiswa Deploy Framework (Laravel, React, Node.js, PHP)
+
+> 📘 **Panduan Lengkap Langkah Demi Langkah:**  
+> Buka file panduan khusus: [**`TUTORIAL_UPLOAD_FRAMEWORK.md`**](TUTORIAL_UPLOAD_FRAMEWORK.md) untuk panduan mendalam tentang konfigurasi `.gitignore`, `.env.example`, database SQLite/MySQL, dan trik membersihkan folder yang terlanjur ter-commit.
+
+### 🚨 3 Aturan Emas Upload Framework ke GitHub:
+1. **Dilarang keras meng-upload folder `vendor/` (Laravel) dan `node_modules/` (React/Node.js):**
+   * Ukuran folder tersebut mencapai 200–500 MB dan berisi puluhan ribu file dependensi pihak ketiga.
+   * Cukup upload `composer.json` atau `package.json`. Server cloud / PaaS akan otomatis mengunduhnya via `composer install` atau `npm install`.
+2. **Dilarang meng-upload file `.env`:**
+   * File `.env` memuat password database dan secret key lokal. Cukup upload template publiknya: **`.env.example`**.
+3. **Konfigurasi Webroot:**
+   * Pada Laravel, arahkan webroot server ke subfolder **`/public`**, bukan root project!
 
 ---
 
