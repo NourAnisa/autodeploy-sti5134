@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Layanan & Sistem Virtual — AutoDeploy Cloud</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --success: #34d399;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--success);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px var(--success);
+    }
+    h1 {
+      font-size: 1.75rem;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    p.desc {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .info-item {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .info-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .info-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+    .instruction {
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 4px solid var(--accent);
+      padding: 14px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.88rem;
+      color: #e0f2fe;
+      line-height: 1.5;
+    }
+    .instruction code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: Consolas, monospace;
+      color: #38bdf8;
+    }
+    footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">Sistem Virtual Live (AutoDeploy Aktif)</div>
+    <h1>STI5134 — Layanan & Sistem Virtual</h1>
+    <p class="desc">
+      Aplikasi web ini berhasil di-deploy secara otomatis melalui pipeline Cloud Containerization. 
+      Setiap perubahan kode di GitHub akan langsung ter-update secara otomatis di URL ini.
+    </p>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">Nama Mahasiswa</div>
+        <div class="info-value">Ganti Nama Anda</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">NIM</div>
+        <div class="info-value">2210817xxxxxx</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Platform Host</div>
+        <div class="info-value">Render Cloud PaaS</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Protokol Keamanan</div>
+        <div class="info-value">HTTPS (TLS v1.3)</div>
+      </div>
+    </div>
+
+    <div class="instruction">
+      💡 <strong>Uji Pembuktian AutoDeploy (Praktikum Pertemuan 5):</strong><br>
+      Edit file <code>index.html</code> di repository GitHub Anda, ubah <em>"Ganti Nama Anda"</em> menjadi nama asli Anda, lalu klik <strong>Commit Changes</strong>. Tunggu 1 menit, refresh browser ini, dan lihat perubahan langsung terjadi tanpa perlu deploy manual!
+    </div>
+
+    <footer>
+      Teknologi Informasi — Fakultas Teknik Universitas Lambung Mangkurat
+    </footer>
+  </div>
+</body>
+</html>
