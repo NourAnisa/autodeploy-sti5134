@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Layanan & Sistem Virtual — AutoDeploy Cloud</title>
+  <title>STI5134 — AutoDeploy & Application Virtualization</title>
   <style>
     :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
+      --bg: #090d16;
+      --card-bg: #131c2e;
       --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
       --text: #f8fafc;
       --muted: #94a3b8;
-      --success: #34d399;
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.3);
+      --border: rgba(255, 255, 255, 0.08);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -22,60 +25,84 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 24px 16px;
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
     }
     .card {
       background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px;
-      padding: 32px;
-      max-width: 600px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px;
+      max-width: 650px;
       width: 100%;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #38bdf8, #10b981, #6366f1);
     }
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      background: rgba(52, 211, 153, 0.15);
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.12);
       color: var(--success);
-      padding: 4px 12px;
+      padding: 6px 14px;
       border-radius: 999px;
       font-size: 0.85rem;
       font-weight: 600;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
     }
-    .badge::before {
-      content: '';
+    .pulse-dot {
       width: 8px;
       height: 8px;
       background: var(--success);
       border-radius: 50%;
-      display: inline-block;
-      box-shadow: 0 0 8px var(--success);
+      box-shadow: 0 0 10px var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
     h1 {
-      font-size: 1.75rem;
+      font-size: 1.8rem;
       color: var(--text);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+    .sub-title {
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-bottom: 16px;
+      font-weight: 500;
     }
     p.desc {
       color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.92rem;
+      line-height: 1.6;
       margin-bottom: 24px;
     }
     .info-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       margin-bottom: 24px;
     }
     .info-item {
-      background: rgba(15, 23, 42, 0.6);
-      padding: 12px 16px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(9, 13, 22, 0.7);
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
     }
     .info-label {
       font-size: 0.75rem;
@@ -86,70 +113,115 @@
     .info-value {
       font-size: 1rem;
       font-weight: 600;
-      color: var(--accent);
+      color: var(--text);
       margin-top: 4px;
     }
+    .highlight {
+      color: var(--accent);
+    }
     .instruction {
-      background: rgba(56, 189, 248, 0.08);
+      background: rgba(56, 189, 248, 0.06);
       border-left: 4px solid var(--accent);
-      padding: 14px 16px;
-      border-radius: 0 8px 8px 0;
+      padding: 16px;
+      border-radius: 0 12px 12px 0;
       font-size: 0.88rem;
-      color: #e0f2fe;
-      line-height: 1.5;
+      color: #e2e8f0;
+      line-height: 1.6;
+      margin-bottom: 24px;
     }
     .instruction code {
-      background: rgba(0,0,0,0.3);
-      padding: 2px 6px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px 6px;
       border-radius: 4px;
       font-family: Consolas, monospace;
-      color: #38bdf8;
+      color: var(--accent);
+      font-size: 0.85em;
+    }
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .link-btn {
+      display: block;
+      text-align: center;
+      padding: 10px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .link-btn:hover {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: var(--accent);
+      color: #fff;
     }
     footer {
-      margin-top: 24px;
       text-align: center;
       font-size: 0.8rem;
       color: var(--muted);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      line-height: 1.5;
+    }
+    @media (max-width: 540px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .links-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="badge">Sistem Virtual Live (AutoDeploy Aktif)</div>
-    <h1>STI5134 — Layanan & Sistem Virtual</h1>
+    <div class="badge">
+      <span class="pulse-dot"></span>
+      AutoDeploy CI/CD Pipeline Aktif
+    </div>
+    
+    <h1>STI5134 — Layanan &amp; Sistem Virtual</h1>
+    <div class="sub-title">Sub-CPMK-3: Application Virtualization &amp; Automated CI/CD</div>
+    
     <p class="desc">
-      Aplikasi web ini berhasil di-deploy secara otomatis melalui pipeline Cloud Containerization. 
-      Setiap perubahan kode di GitHub akan langsung ter-update secara otomatis di URL ini.
+      Aplikasi web ini ter-deploy secara otomatis melalui pipeline otomasi modern. Setiap komit kode di GitHub langsung memicu workflow validasi dan sinkronisasi ke server tanpa proses manual.
     </p>
 
     <div class="info-grid">
       <div class="info-item">
         <div class="info-label">Nama Mahasiswa</div>
-        <div class="info-value">Ganti Nama Anda</div>
+        <div class="info-value highlight">Ganti Nama Anda</div>
       </div>
       <div class="info-item">
-        <div class="info-label">NIM</div>
-        <div class="info-value">2210817xxxxxx</div>
+        <div class="info-label">NIM Mahasiswa</div>
+        <div class="info-value highlight">2210817xxxxxx</div>
       </div>
       <div class="info-item">
-        <div class="info-label">Platform Host</div>
-        <div class="info-value">Render Cloud PaaS</div>
+        <div class="info-label">Infrastruktur Server</div>
+        <div class="info-value">Ubuntu 24.04 LTS (VPS Cloud)</div>
       </div>
       <div class="info-item">
-        <div class="info-label">Protokol Keamanan</div>
-        <div class="info-value">HTTPS (TLS v1.3)</div>
+        <div class="info-label">Pipeline Engine</div>
+        <div class="info-value">GitHub Actions &amp; Webhook</div>
       </div>
     </div>
 
     <div class="instruction">
-      💡 <strong>Uji Pembuktian AutoDeploy (Praktikum Pertemuan 5):</strong><br>
-      Edit file <code>index.html</code> di repository GitHub Anda, ubah <em>"Ganti Nama Anda"</em> menjadi nama asli Anda, lalu klik <strong>Commit Changes</strong>. Tunggu 1 menit, refresh browser ini, dan lihat perubahan langsung terjadi tanpa perlu deploy manual!
+      🧪 <strong>Uji Keajaiban AutoDeploy (Tugas Praktikum P05):</strong><br>
+      Edit file <code>index.html</code> pada repositori GitHub Anda, ubah teks <em>"Ganti Nama Anda"</em> menjadi nama lengkap Anda, isi NIM Anda, lalu klik <strong>Commit changes</strong>. Amati proses build otomatis di tab <strong>Actions</strong> dan refresh halaman ini dalam ~30 detik!
+    </div>
+
+    <div class="links-grid">
+      <a class="link-btn" href="https://github.com/NourAnisa/autodeploy-sti5134/blob/main/README.md" target="_blank">📖 Panduan Modul</a>
+      <a class="link-btn" href="https://github.com/NourAnisa/autodeploy-sti5134/blob/main/CONTOH_LAPORAN.md" target="_blank">📄 Contoh Laporan</a>
+      <a class="link-btn" href="https://github.com/NourAnisa/autodeploy-sti5134/actions" target="_blank">⚡ Tab Actions</a>
     </div>
 
     <footer>
-      Teknologi Informasi — Fakultas Teknik Universitas Lambung Mangkurat
+      Program Studi S1 Teknologi Informasi &bull; Fakultas Teknik<br>
+      <strong>Universitas Lambung Mangkurat (ULM)</strong>
     </footer>
   </div>
 </body>

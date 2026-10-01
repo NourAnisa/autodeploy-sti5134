@@ -19,42 +19,31 @@ Sistem ini telah diuji dan berjalan secara penuh di infrastruktur server mandiri
 
 ---
 
-## 🏛️ Arsitektur Sistem AutoDeploy
-
-Berikut adalah visualisasi alur kerja dari saat kode diubah di GitHub hingga tampil secara langsung di server:
+## 🗺️ Gambaran Sistem & Arsitektur CI/CD
 
 ```text
-[ Browser Mahasiswa / Developer ]
-             │
-             │ (1) Git Commit & Push
-             ▼
-      [ GitHub Repository ]
-      github.com/NourAnisa/autodeploy-sti5134
-             │
-             │ (2) HTTP POST Webhook Payload (Event: Push)
-             ▼
-┌─────────────────────────────────────────────────────────────┐
-│ VPS Ubuntu 24.04 LTS (103.180.124.142)                      │
-│                                                             │
-│  [ Port 8080: Python Webhook Receiver ]                     │
-│    └─ Menerima sinyal POST dari GitHub                      │
-│    └─ Memanggil: /usr/local/bin/autodeploy.sh               │
-│                                                             │
-│  [ Pipeline Eksekusi Bash ]                                 │
-│    ├─ cd /opt/sti5134                                       │
-│    ├─ git pull origin main                                  │
-│    └─ cp -rT /opt/sti5134 /var/www/html                     │
-│                                                             │
-│  [ Port 80: Nginx Web Server ]                              │
-│    └─ Menyajikan file /var/www/html/index.html terbaru      │
-│                                                             │
-│  [ Failsafe: Cron Job Backup ]                              │
-│    └─ Menjalankan autodeploy.sh setiap 5 menit (*/5)        │
-└─────────────────────────────────────────────────────────────┘
-             │
-             │ (3) Akses Web Publik
-             ▼
-   [ Pengunjung / Browser Dosen ]
+Kamu push kode ke GitHub (branch main)
+        │
+        ▼
+GitHub Actions berjalan otomatis (file: .github/workflows/deploy.yml)
+  • 🔍 1. Deteksi Framework (Laravel / PHP Composer / PHP Native / Node.js / HTML5)
+  • 📦 2. Buat ZIP dari kode kamu (dotfiles disertakan, .env & vendor dikecualikan)
+  • 🌐 3. Kirim trigger webhook & payload ke Server VPS (103.180.124.142:8080)
+        │
+        ▼
+Server VPS Menerima Sinyal & Eksekusi Otomatis
+  • Ekstrak / Git Pull kode terbaru ke /opt/sti5134
+  • Sinkronisasi file ke web server Nginx (/var/www/html)
+  • Failsafe redundansi: Cron Job setiap 5 menit (*/5)
+        │
+        ▼
+Web kamu live di:
+  • Server VPS Kelas: http://103.180.124.142
+  • Dokploy Container: http://103.180.124.142:3000
+  • GitHub Pages Mandiri: https://[username].github.io/autodeploy-sti5134/
+
+Di GitHub Actions → tab Actions → job terbaru → Job Summary
+kamu akan menemukan SEMUA informasi status deployment + link live secara lengkap!
 ```
 
 ---
