@@ -1,0 +1,176 @@
+name: 🚀 STI5134 AutoDeploy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'LICENSE'
+
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Target Deployment'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - vps
+          - pages
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # JOB 1: DETECT & VALIDATE FRAMEWORK
+  # ──────────────────────────────────────────────────────────
+  detect:
+    name: 🔍 1. Detect & Validate
+    runs-on: ubuntu-latest
+    outputs:
+      app_type:    ${{ steps.detect.outputs.app_type }}
+      repo_slug:   ${{ steps.slug.outputs.repo_slug }}
+      has_node:    ${{ steps.detect.outputs.has_node }}
+
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🏷️ Generate Repo Slug
+        id: slug
+        run: |
+          SLUG=$(echo "${{ github.event.repository.name }}" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed 's/[^a-z0-9-]/-/g' \
+            | sed 's/--*/-/g' \
+            | sed 's/^-//;s/-$//')
+          echo "repo_slug=$SLUG" >> "$GITHUB_OUTPUT"
+
+      - name: 🔎 Detect Framework
+        id: detect
+        run: |
+          if [[ -f "artisan" && -f "composer.json" ]]; then
+            echo "app_type=Laravel" >> "$GITHUB_OUTPUT"
+          elif [[ -f "composer.json" ]]; then
+            echo "app_type=PHP Composer" >> "$GITHUB_OUTPUT"
+          elif ls *.php 1> /dev/null 2>&1; then
+            echo "app_type=PHP Native" >> "$GITHUB_OUTPUT"
+          elif [[ -f "package.json" ]]; then
+            echo "app_type=Node.js" >> "$GITHUB_OUTPUT"
+          else
+            echo "app_type=Static HTML5" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ -f "package.json" ]]; then
+            echo "has_node=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_node=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ──────────────────────────────────────────────────────────
+  # JOB 2: PACKAGE & TRIGGER AUTODEPLOY
+  # ──────────────────────────────────────────────────────────
+  deploy:
+    name: 🚀 2. Package & Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: detect
+    env:
+      REPO_SLUG: ${{ needs.detect.outputs.repo_slug }}
+      APP_TYPE:  ${{ needs.detect.outputs.app_type }}
+      VPS_HOST:  103.180.124.142
+      VPS_PORT:  8080
+
+    steps:
+      - name: ⬇️ Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 📦 Create Deployment Package (ZIP)
+        run: |
+          find . \
+            -not -path "./.git/*" \
+            -not -path "./.github/*" \
+            -not -path "./node_modules/*" \
+            -not -path "./vendor/*" \
+            -not -name ".env" \
+            -not -name "deploy.zip" \
+            -not -name "*.log" \
+            | zip deploy.zip -@ -q
+
+          ZIP_SIZE=$(du -sh deploy.zip | cut -f1)
+          echo "ZIP_SIZE=$ZIP_SIZE" >> "$GITHUB_ENV"
+          echo "✅ Package created successfully: $ZIP_SIZE"
+
+      - name: 🌐 Trigger VPS AutoDeploy Webhook
+        id: webhook
+        run: |
+          START_TIME=$(date +%s)
+          echo "Mengirim payload trigger ke VPS ($VPS_HOST:$VPS_PORT)..."
+          
+          HTTP_CODE=$(curl -s -o response.txt -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"event\":\"push\",\"repository\":\"${{ github.repository }}\",\"commit\":\"${{ github.sha }}\",\"ref\":\"${{ github.ref }}\",\"app_type\":\"$APP_TYPE\"}" \
+            "http://$VPS_HOST:$VPS_PORT" || echo "000")
+
+          END_TIME=$(date +%s)
+          LATENCY=$((END_TIME - START_TIME))
+
+          echo "HTTP_CODE=$HTTP_CODE" >> "$GITHUB_ENV"
+          echo "LATENCY=${LATENCY}s" >> "$GITHUB_ENV"
+          echo "Server Response:"
+          cat response.txt || true
+
+          if [[ "$HTTP_CODE" == "200" || "$HTTP_CODE" == "201" ]]; then
+            echo "DEPLOY_STATUS=SUCCESS" >> "$GITHUB_ENV"
+          else
+            echo "DEPLOY_STATUS=PENDING_CRON" >> "$GITHUB_ENV"
+          fi
+
+      - name: 📝 Generate GitHub Step Summary (Dashboard)
+        if: always()
+        run: |
+          if [[ "${{ env.DEPLOY_STATUS }}" == "SUCCESS" ]]; then
+            STATUS_BADGE="🟢 SUKSES (Live Instan via Webhook)"
+          else
+            STATUS_BADGE="🟡 BERJALAN (Sinkronisasi via Cron 5 Menit)"
+          fi
+
+          cat >> "$GITHUB_STEP_SUMMARY" << EOF
+          # 🚀 STI5134 AutoDeploy Pipeline — Job Summary
+
+          Layanan dan Sistem Virtual (STI5134) &bull; Program Studi S1 Teknologi Informasi FT ULM  
+          Dosen Pengampu: **Ir. Nor Anisa & Andry Fajar Zulkarnain, S.ST., M.T.**
+
+          ---
+
+          ### 📊 Status Deployment
+          | Parameter | Nilai / Keterangan |
+          | :--- | :--- |
+          | **Status Pipeline** | **$STATUS_BADGE** |
+          | **Repository** | \`${{ github.repository }}\` |
+          | **Branch** | \`${{ github.ref_name }}\` |
+          | **Commit SHA** | \`${{ github.sha }}\` |
+          | **Deteksi Framework** | **\`$APP_TYPE\`** |
+          | **Ukuran Package** | \`${{ env.ZIP_SIZE }}\` |
+          | **Latensi Transmisi** | \`${{ env.LATENCY }}\` |
+          | **Target Server VPS** | \`$VPS_HOST\` (Ubuntu 24.04 LTS) |
+
+          ---
+
+          ### 🌐 Akses Live Application
+          * **Akses Server Kelas (VPS):** [http://$VPS_HOST](http://$VPS_HOST)
+          * **Akses Dokploy Management:** [http://$VPS_HOST:3000](http://$VPS_HOST:3000)
+          * **Akses Mandiri (GitHub Pages):** [https://${{ github.repository_owner }}.github.io/${{ env.REPO_SLUG }}/](https://${{ github.repository_owner }}.github.io/${{ env.REPO_SLUG }}/)
+
+          ---
+
+          > 💡 **Prinsip Sub-CPMK-3 (Application Virtualization):**  
+          > Seluruh proses dari push kode, deteksi framework, kompresi artefak, hingga reload Nginx di server dilakukan secara otomatis tanpa intervensi fisik pada perangkat server.
+          EOF
